@@ -34,7 +34,7 @@ define double(x) = x * x
 
 Would have the following AST:
 
-```
+```erl
 [{define, double, [x],
   {apply, '*', [{var, x}, {int, 2}]}}]
 ```
@@ -45,7 +45,7 @@ Compilers do many transformations in these ASTs, and it's generally a lot of wor
 
 For example, let's say we want to, as an optimisation, change all forms like `x * 2` to `x + x`. With the generic traversals we can simply go for the `bottom_up` transformation:
 
-```
+```erl
 optimise_multiply(Ast) ->
   generique:bottom_up(
     fun({apply, '*', [{var, X}, {int, 2}]}) -> {apply, '+', [{var, X}, {var, X}]};
@@ -63,11 +63,12 @@ Another thing we may want to do is querying information in a tree. Again, writin
 
 Let's say we want to collect all of the constants in the Ast to allocate them in a separate area. We could use `collect` to write this:
 
-```
+```erl
 collect_constants(Ast) ->
   generique:collect(
-    fun({int, X}) -> X;
-       (X) -> X
+    fun(A, B) -> A ++ B end,
+    fun({int, X}) -> [X];
+       (X) -> []
     end,
     Ast
   ).
